@@ -8,9 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.MockMvc
 import spock.lang.Specification
 
-import static org.hamcrest.Matchers.contains
 import static org.hamcrest.Matchers.containsString
-import static org.hamcrest.Matchers.equalTo
+import static org.hamcrest.Matchers.hasSize
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -26,12 +25,13 @@ class ProductSearchIntegrationSpec extends Specification {
     @Autowired
     MockMvc mockMvc
 
-    def 'get list of products by description'() {
+    def 'when search with valid description is invoked, product list of correct size is returned'() {
         given:
-        def product = new Product(code: 'New fighter', description: 'Unknown fighter')
-        def product2 = new Product(code: 'New fighter2', description: 'Unknown')
-        productRepository.saveAndFlush(product)
-        productRepository.saveAndFlush(product2)
+        def products = [
+                new Product(code: 'New fighter', description: 'Unknown fighter'),
+                new Product(code: 'New fighter2', description: 'Unknown'),
+        ]
+        productRepository.saveAllAndFlush(products)
 
         when:
         def response = mockMvc.perform(get(PRODUCT_CONTROLLER_PATH).param('description', 'Unknown'))
@@ -39,9 +39,10 @@ class ProductSearchIntegrationSpec extends Specification {
         then:
         response.andExpect(status().isOk())
                 .andExpect(jsonPath('$[0].description', containsString('Unknown')))
+                .andExpect(jsonPath('$', hasSize(2)))
     }
 
-    def 'return 404 not found for invalid description'() {
+    def 'when search with invalid description is invoked, 404 not found is returned'() {
         when:
         def response = mockMvc.perform(get(PRODUCT_CONTROLLER_PATH).param('description', 'FOO'))
 
