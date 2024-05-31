@@ -25,13 +25,12 @@ class ProductSearchIntegrationSpec extends Specification {
     @Autowired
     MockMvc mockMvc
 
-    def 'when search with valid description is invoked, product list of correct size is returned'() {
+    def 'when products are searched by description, all entries with description containing keyword are returned'() {
         given:
-        def products = [
-                new Product(code: 'New fighter', description: 'Unknown fighter'),
-                new Product(code: 'New fighter2', description: 'Unknown'),
-        ]
-        productRepository.saveAllAndFlush(products)
+        def product  = new Product(code: 'New fighter', description: 'Unknown fighter')
+        def product2 = new Product(code: 'New fighter2', description: 'Unknown')
+
+        productRepository.saveAllAndFlush([product, product2])
 
         when:
         def response = mockMvc.perform(get(PRODUCT_CONTROLLER_PATH).param('description', 'Unknown'))
@@ -42,7 +41,7 @@ class ProductSearchIntegrationSpec extends Specification {
                 .andExpect(jsonPath('$', hasSize(2)))
     }
 
-    def 'when search with invalid description is invoked, 404 not found is returned'() {
+    def 'when products are searched by description not present in database, 404 not found is returned'() {
         when:
         def response = mockMvc.perform(get(PRODUCT_CONTROLLER_PATH).param('description', 'FOO'))
 
