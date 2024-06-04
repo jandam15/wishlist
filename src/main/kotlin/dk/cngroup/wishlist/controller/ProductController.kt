@@ -11,6 +11,16 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class ProductController(private val repository: ProductRepository) {
 
+    @GetMapping("/products/search/findByCode")
+    fun getProductsByCode(
+        @RequestParam code: String
+    ): ResponseEntity<out Any>? {
+        val result = repository.findByCodeStartingWithIgnoreCase(code)
+        if (result.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product with desired code not found")
+        }
+        return ResponseEntity.ok(result)
+    }
 
     @GetMapping("/products/search/findByDescription")
     fun getProductsByDescription(
