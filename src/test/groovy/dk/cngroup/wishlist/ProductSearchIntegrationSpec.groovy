@@ -27,8 +27,8 @@ class ProductSearchIntegrationSpec extends Specification {
 
     def 'when products are searched by description, all entries with description containing keyword are returned'() {
         given:
-        def product = new Product(code: 'New fighter', description: 'Unknown fighter')
-        def product2 = new Product(code: 'New fighter2', description: 'Unknown')
+        def product = new Product(code: 'Unknown fighter', description: 'Unknown fighter')
+        def product2 = new Product(code: 'unknown ship', description: 'Unknown')
 
         productRepository.saveAllAndFlush([product, product2])
 

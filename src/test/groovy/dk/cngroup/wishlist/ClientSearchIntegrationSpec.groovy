@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 import spock.lang.Specification
 
 import static org.hamcrest.Matchers.equalTo
+import static org.hamcrest.Matchers.hasSize
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -21,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ClientSearchIntegrationSpec extends Specification {
 
     static final CONTROLLER_PATH = '/clients/search/findByUserName'
+    static final CLIENT_CONTROLLER_SEARCHBYCODE_PATH = '/clients/search/findByProduct'
 
     @Autowired
     ClientRepository clientRepository
@@ -45,6 +47,36 @@ class ClientSearchIntegrationSpec extends Specification {
     def '404 is returned for invalid userName'() {
         when:
         def response = mockMvc.perform(get(CONTROLLER_PATH).param('userName', 'FOO'))
+
+        then:
+        response.andExpect(status().isNotFound())
+    }
+
+    @Transactional
+    def 'List of clients that have desired products on their wishlists is returned'() {
+        given:
+        def wishes = new Wishlist(products: [new Product(code: 'Scimitar')])
+        def wishes2 = new Wishlist(products: [new Product(code: 'scimitar')])
+
+        def maul = new Client(active: true, firstName: 'Darth', lastName: 'Maul', wishes: [wishes])
+        def vader = new Client(active: true, firstName: 'Darth', lastName: 'Vader', wishes: [wishes2])
+
+        clientRepository.saveAllAndFlush([maul, vader])
+
+        when:
+        def response = mockMvc.perform(get(CLIENT_CONTROLLER_SEARCHBYCODE_PATH).param('code', 'scim'))
+
+        then:
+        response.andExpect(status().isOk())
+                .andExpect(jsonPath('$[0].lastName', equalTo("Maul")))
+                .andExpect(jsonPath('$[1].lastName', equalTo("Vader")))
+                .andExpect(jsonPath('$', hasSize(2)))
+
+    }
+
+    def 'When searched for product that is not on any wishlist return 404 not found'() {
+        when:
+        def response = mockMvc.perform(get(CLIENT_CONTROLLER_SEARCHBYCODE_PATH).param('code', 'FOO'))
 
         then:
         response.andExpect(status().isNotFound())
