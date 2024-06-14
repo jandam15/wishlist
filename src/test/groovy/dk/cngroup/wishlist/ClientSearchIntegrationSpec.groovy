@@ -68,9 +68,9 @@ class ClientSearchIntegrationSpec extends Specification {
 
         then:
         response.andExpect(status().isOk())
-                .andExpect(jsonPath('$[0].lastName', equalTo("Maul")))
-                .andExpect(jsonPath('$[1].lastName', equalTo("Vader")))
-                .andExpect(jsonPath('$', hasSize(2)))
+                .andExpect(jsonPath('$.content[0].lastName', equalTo("Maul")))
+                .andExpect(jsonPath('$.content[1].lastName', equalTo("Vader")))
+                .andExpect(jsonPath('$.content', hasSize(2)))
 
     }
 
@@ -80,5 +80,29 @@ class ClientSearchIntegrationSpec extends Specification {
 
         then:
         response.andExpect(status().isNotFound())
+    }
+
+    @Transactional
+    def 'List of clients on given page of given size that have desired products on their wishlists is returned'() {
+        given:
+        def wishes = new Wishlist(products: [new Product(code: 'Father')])
+        def wishes2 = new Wishlist(products: [new Product(code: 'father')])
+
+        def skywalker = new Client(active: true, firstName: 'Anakin', lastName: 'Skywalker', wishes: [wishes])
+        def windu = new Client(active: true, firstName: 'Mace', lastName: 'Windu', wishes: [wishes2])
+
+        clientRepository.saveAllAndFlush([skywalker, windu])
+
+        when:
+        def response = mockMvc.perform(get(CLIENT_CONTROLLER_SEARCHBYCODE_PATH)
+                .param('code', 'fat')
+                .param('page', '2')
+                .param('size', '1')
+        )
+
+        then:
+        response.andExpect(status().isOk())
+                .andExpect(jsonPath('$.content[0].lastName', equalTo("Windu")))
+                .andExpect(jsonPath('$.content', hasSize(1)))
     }
 }
