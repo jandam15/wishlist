@@ -3,6 +3,7 @@ package dk.cngroup.wishlist.entity
 import jakarta.persistence.Entity
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.rest.core.annotation.Description
 
@@ -16,6 +17,6 @@ class Product(
 ) : AuditableEntity()
 
 interface ProductRepository : JpaRepository<Product?, Long?> {
-    fun findByCodeStartingWithIgnoreCase(code: String): List<Product>
-    fun findByDescriptionContaining(description: String): List<Product>
+    fun findByCodeStartingWithIgnoreCase(code: String, pagination: Pageable?): List<Product>
+    fun findByDescriptionContaining(description: String, pagination: Pageable): List<Product>
 }
