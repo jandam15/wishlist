@@ -1,10 +1,7 @@
 package dk.cngroup.wishlist.entity
 
 import com.fasterxml.jackson.annotation.JsonManagedReference
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Entity
-import jakarta.persistence.OneToMany
-import jakarta.persistence.OrderColumn
+import jakarta.persistence.*
 import org.hibernate.annotations.Formula
 import org.hibernate.annotations.Where
 import org.springframework.data.jpa.repository.EntityGraph
@@ -20,7 +17,10 @@ class Client(
     @JsonManagedReference
     @OneToMany(mappedBy = "client", cascade = [CascadeType.ALL])
     @OrderColumn
-    var wishes: MutableList<Wishlist> = mutableListOf()
+    var wishes: MutableList<Wishlist> = mutableListOf(),
+
+    @Transient
+    var productCode: String? = null
 ) : AuditableEntity() {
     @Formula("upper(concat(first_name, '_', last_name))")
     val userName: String? = null

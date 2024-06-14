@@ -17,7 +17,7 @@ class DatabaseInitializer(private val clientRepository: ClientRepository) : Comm
         val sithInterceptor = Product(code = "Sith Interceptor")//, description = "Sith starfighter")
         val sithInterceptor2 = Product(code = "sith Interceptor")//, description = "Sith starfighter")
         val starCreator = Product(code = "Star Creator", description = "Made up ship")
-        val wishlist = Wishlist(products = arrayListOf(tieFighter, deathStar, starDestroyer, imperialShuttle, sithInterceptor, sithInterceptor2))
+        val wishlist = Wishlist(products = arrayListOf(tieFighter, deathStar, starDestroyer, starCreator, imperialShuttle, sithInterceptor, sithInterceptor2))
         val vader = Client(firstName = "Darth", lastName = "Vader")
         val wishlist2 = Wishlist(products = arrayListOf(tieFighter, imperialShuttle, starCreator))
         val obiwan = Client(firstName = "Obi-Wan", lastName = "Kenobi")

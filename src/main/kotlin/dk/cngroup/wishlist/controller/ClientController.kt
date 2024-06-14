@@ -59,21 +59,21 @@ class ClientSearchController(
     fun getClientsByProduct(clients: List<Client>, products: List<Product>): List<Client> {
         val result = mutableListOf<Client>()
         var productsOnWishlist = mutableListOf<Product>()
-        var toNextClient = false
 
         for (client in clients) {
             productsOnWishlist = client.wishes[0].products
             for (i in 0 until productsOnWishlist.size) {
                 for (j in 0 until products.size) {
                     if (productsOnWishlist[i].code == products[j].code) {
+                        if(client.productCode == null)
+                            client.productCode = "${products[j].code};"
+                        else
+                            client.productCode += "${products[j].code};"
+
                         result += client
-                        toNextClient = true
-                        break
                     }
                 }
-                if (toNextClient) break
             }
-            toNextClient = false
         }
         return result
     }
