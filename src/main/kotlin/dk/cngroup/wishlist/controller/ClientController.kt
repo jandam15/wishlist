@@ -64,20 +64,25 @@ class ClientSearchController(
         return ResponseEntity.ok(result)
     }
 
-    fun getClientsByProduct(clients: List<Client>, products: List<Product>): List<Client> {
+    fun getClientsByProduct(clients: List<Client>, allProducts: List<Product>): List<Client> {
         val result = mutableListOf<Client>()
         var productsOnWishlist = mutableListOf<Product>()
 
+        /*
+         * Check products on wishlists of every client
+         * If they match with any products on desired list, add product codes to productCode field of given client and add that client to result
+         */
         clients.forEach {
             productsOnWishlist = it.wishes[0].products
-            for (i in 0 until productsOnWishlist.size) {
-                for (j in 0 until products.size) {
-                    if (productsOnWishlist[i].code == products[j].code) {
+            for (wishedProduct in productsOnWishlist) {
+                for (product in allProducts) {
+                    if (wishedProduct.code == product.code) {
+                        //addProductCodeToClient
                         if (it.productCode == null)
-                            it.productCode = "${products[j].code};"
+                            it.productCode = "${product.code};"
                         else
-                            it.productCode += "${products[j].code};"
-
+                            it.productCode += "${product.code};"
+                        //add Client to result
                         result += it
                     }
                 }
