@@ -105,4 +105,29 @@ class ClientSearchIntegrationSpec extends Specification {
                 .andExpect(jsonPath('$.content[0].lastName', equalTo("Windu")))
                 .andExpect(jsonPath('$.content', hasSize(1)))
     }
+
+    def 'When searched for product on page 0 or below return 404 not found'() {
+        when:
+        def response = mockMvc.perform(get(CLIENT_CONTROLLER_SEARCHBYCODE_PATH)
+                .param('code', 'fat')
+                .param('page', '0')
+                .param('size', '1')
+        )
+
+        then:
+        response.andExpect(status().isNotFound())
+    }
+
+    def 'When searched for product on page exceeding total count of pages return 404 not found'() {
+        when:
+        def response = mockMvc.perform(get(CLIENT_CONTROLLER_SEARCHBYCODE_PATH)
+                .param('code', 'fat')
+                .param('page', '99')
+                .param('size', '1')
+        )
+
+        then:
+        response.andExpect(status().isNotFound())
+    }
+
 }

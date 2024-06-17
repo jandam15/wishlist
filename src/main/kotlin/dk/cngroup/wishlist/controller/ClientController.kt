@@ -46,13 +46,21 @@ class ClientSearchController(
             clientRepository.findByIdIsNotNull(),
             productRepository.findByCodeStartingWithIgnoreCase(code, null)
         )
-        val result = listToPage(clients, page - 1, size)
-
-
-        if (result.isEmpty) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("No client has product with desired code on wishlist")
+        //Page indexing starts from 1
+        val pageOffset = page - 1
+        val result: PageImpl<Client?>
+        try {
+            result = listToPage(clients, pageOffset, size)
+        } catch (_: IllegalArgumentException) {
+            return responseEntity404("Page index out of bounds. Index must not be less than 1 or more than total number of pages.")
         }
+
+        if (pageOffset == result.totalPages)
+            return responseEntity404("Page index out of bounds. Index must not be less than 1 or more than total number of pages.")
+
+        if (result.isEmpty)
+            return responseEntity404("No client has product with desired code on wishlist")
+
         return ResponseEntity.ok(result)
     }
 
@@ -60,17 +68,17 @@ class ClientSearchController(
         val result = mutableListOf<Client>()
         var productsOnWishlist = mutableListOf<Product>()
 
-        for (client in clients) {
-            productsOnWishlist = client.wishes[0].products
+        clients.forEach {
+            productsOnWishlist = it.wishes[0].products
             for (i in 0 until productsOnWishlist.size) {
                 for (j in 0 until products.size) {
                     if (productsOnWishlist[i].code == products[j].code) {
-                        if(client.productCode == null)
-                            client.productCode = "${products[j].code};"
+                        if (it.productCode == null)
+                            it.productCode = "${products[j].code};"
                         else
-                            client.productCode += "${products[j].code};"
+                            it.productCode += "${products[j].code};"
 
-                        result += client
+                        result += it
                     }
                 }
             }
@@ -88,4 +96,8 @@ class ClientSearchController(
     }
 
     private fun createPageRequest(page: Int, size: Int): PageRequest? = PageRequest.of(page, size)
+
+    private fun responseEntity404(message: String?) = ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(message)
+
 }
