@@ -18,6 +18,6 @@ class Product(
 ) : AuditableEntity()
 
 interface ProductRepository : JpaRepository<Product?, Long?> {
-    fun findByCodeStartingWithIgnoreCase(code: String, pagination: Pageable?): Page<Product>
+    fun findByCodeStartingWithIgnoreCase(code: String, pagination: Pageable): Page<Product>
     fun findByDescriptionContaining(description: String, pagination: Pageable): Page<Product>
 }

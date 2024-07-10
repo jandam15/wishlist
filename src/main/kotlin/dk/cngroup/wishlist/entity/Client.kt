@@ -4,8 +4,12 @@ import com.fasterxml.jackson.annotation.JsonManagedReference
 import jakarta.persistence.*
 import org.hibernate.annotations.Formula
 import org.hibernate.annotations.Where
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.data.rest.core.annotation.RestResource
 
 @Entity
@@ -42,6 +46,16 @@ interface ClientRepository : JpaRepository<Client, Long> {
     @EntityGraph(attributePaths = ["wishes.products"])
     fun findClientByUserName(userName: String): Client
 
-    @EntityGraph(attributePaths = ["wishes.products"])
-    fun findByIdIsNotNull(): List<Client>
+    fun findByWishesProductsCodeStartingWithIgnoreCaseOrderByLastName(code: String, pagination: Pageable): Page<Client>
+
+    @Query(
+        """
+        SELECT DISTINCT c, p.code FROM Client c
+        JOIN c.wishes w
+        JOIN w.products p
+        WHERE LOWER(p.code) LIKE LOWER(:code)
+        ORDER BY c.lastName
+    """
+    )
+    fun getClientsByProduct(@Param("code") code: String, pagination: Pageable): Page<Client>
 }
