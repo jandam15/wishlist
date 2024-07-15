@@ -37,8 +37,8 @@ class ProductSearchIntegrationSpec extends Specification {
 
         then:
         response.andExpect(status().isOk())
-                .andExpect(jsonPath('$[0].description', containsString('Unknown')))
-                .andExpect(jsonPath('$', hasSize(2)))
+                .andExpect(jsonPath('$.content[0].description', containsString('Unknown')))
+                .andExpect(jsonPath('$.content', hasSize(2)))
     }
 
     def 'when products are searched by description not present in database, 404 not found is returned'() {
@@ -62,10 +62,10 @@ class ProductSearchIntegrationSpec extends Specification {
 
         then:
         response.andExpect(status().isOk())
-                .andExpect(jsonPath('$.[0].code', startsWithIgnoringCase('new')))
-                .andExpect(jsonPath('$.[1].code', startsWithIgnoringCase('new')))
+                .andExpect(jsonPath('$.content[0].code', startsWithIgnoringCase('new')))
+                .andExpect(jsonPath('$.content[1].code', startsWithIgnoringCase('new')))
 //                .andExpect(jsonPath('$.[2].code', startsWithIgnoringCase('new')))
-                .andExpect(jsonPath('$', hasSize(2)))
+                .andExpect(jsonPath('$.content', hasSize(2)))
     }
 
     def 'when products searched by code starting with keyword ignoring case not present in database, 404 not found is returned'() {
