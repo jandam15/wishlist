@@ -5,8 +5,10 @@ import dk.cngroup.wishlist.entity.ClientRepository
 import dk.cngroup.wishlist.entity.Product
 import dk.cngroup.wishlist.entity.Wishlist
 import org.springframework.boot.CommandLineRunner
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
+@Profile("local")
 @Component
 class DatabaseInitializer(private val clientRepository: ClientRepository) : CommandLineRunner {
     override fun run(vararg args: String) {
