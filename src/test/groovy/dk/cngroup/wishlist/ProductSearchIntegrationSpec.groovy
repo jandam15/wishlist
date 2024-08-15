@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.transaction.annotation.Transactional
 import spock.lang.Specification
 
 import static org.hamcrest.Matchers.*
@@ -15,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
+@Transactional
 class ProductSearchIntegrationSpec extends Specification {
 
     static final PRODUCT_CONTROLLER_SEARCHBYDESCRIPTION_PATH = '/products/search/findByDescription'
@@ -37,8 +39,8 @@ class ProductSearchIntegrationSpec extends Specification {
 
         then:
         response.andExpect(status().isOk())
-                .andExpect(jsonPath('$[0].description', containsString('Unknown')))
-                .andExpect(jsonPath('$', hasSize(2)))
+                .andExpect(jsonPath('$.content[0].description', containsString('Unknown')))
+                .andExpect(jsonPath('$.content', hasSize(2)))
     }
 
     def 'when products are searched by description not present in database, 404 not found is returned'() {
@@ -62,10 +64,10 @@ class ProductSearchIntegrationSpec extends Specification {
 
         then:
         response.andExpect(status().isOk())
-                .andExpect(jsonPath('$.[0].code', startsWithIgnoringCase('new')))
-                .andExpect(jsonPath('$.[1].code', startsWithIgnoringCase('new')))
+                .andExpect(jsonPath('$.content[0].code', startsWithIgnoringCase('new')))
+                .andExpect(jsonPath('$.content[1].code', startsWithIgnoringCase('new')))
 //                .andExpect(jsonPath('$.[2].code', startsWithIgnoringCase('new')))
-                .andExpect(jsonPath('$', hasSize(2)))
+                .andExpect(jsonPath('$.content', hasSize(2)))
     }
 
     def 'when products searched by code starting with keyword ignoring case not present in database, 404 not found is returned'() {
