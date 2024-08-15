@@ -29,23 +29,16 @@ class ClientController(private val repository: ClientRepository) {
         @RequestParam code: String,
         pagination: Pageable
     ): ResponseEntity<out Any>? {
-        val clients = repository.findByWishesProductsCodeStartingWithIgnoreCaseOrderByLastName(
-            code = code,
-            pagination = pagination
-        )
+        val clients = repository.findByWishesProductsCodeStartingWithIgnoreCaseOrderByLastName(code, pagination)
         for (client in clients) {
             val products = client.wishes[0].products.filter { it.code.startsWith(code, ignoreCase = true) }
             client.productCode = products.joinToString(separator = ";") { it.code }
         }
-        /*
-        val codePattern = "$code%"
-        val clients = repository.getClientsByProduct(codePattern, pagination)
-        */
+
         if (clients.isEmpty) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body("No client has product with desired code on wishlist")
         }
-
 
         return ResponseEntity.ok(clients)
     }

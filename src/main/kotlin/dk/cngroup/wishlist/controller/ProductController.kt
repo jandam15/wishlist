@@ -17,10 +17,7 @@ class ProductController(private val repository: ProductRepository) {
         @RequestParam(defaultValue = "") code: String,
         pagination: Pageable
     ): ResponseEntity<out Any>? {
-        val result = repository.findByCodeStartingWithIgnoreCase(
-            code = code,
-            pagination = pagination
-        )
+        val result = repository.findByCodeStartingWithIgnoreCase(code, pagination)
         if (result.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product with desired code not found")
         }
@@ -32,16 +29,13 @@ class ProductController(private val repository: ProductRepository) {
         @RequestParam(defaultValue = "") description: String,
         pagination: Pageable
     ): ResponseEntity<out Any>? {
-        val result = repository.findByDescriptionContaining(
-            description = description,
-            pagination = pagination
-        )
+        val result = repository.findByDescriptionContaining(description, pagination)
+
         if (result.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product with desired description not found")
         }
         return ResponseEntity.ok(result)
     }
-
 
     @PostMapping("/product")
     fun saveProduct(@Validated @RequestBody product: Product): Product {
