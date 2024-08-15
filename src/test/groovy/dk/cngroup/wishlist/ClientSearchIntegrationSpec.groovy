@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
+@Transactional
 class ClientSearchIntegrationSpec extends Specification {
 
     static final CONTROLLER_PATH = '/clients/search/findByUserName'
@@ -29,7 +30,6 @@ class ClientSearchIntegrationSpec extends Specification {
     @Autowired
     MockMvc mockMvc
 
-    @Transactional
     def 'Expected JSON response is created for a valid request'() {
         given:
         def wishes = new Wishlist(products: [new Product(code: 'Sith Infiltrator')])
@@ -52,14 +52,15 @@ class ClientSearchIntegrationSpec extends Specification {
         response.andExpect(status().isNotFound())
     }
 
-    @Transactional
     def 'List of clients that have desired products on their wishlists is returned'() {
         given:
         def wishes = new Wishlist(products: [new Product(code: 'Scimitar')])
         def wishes2 = new Wishlist(products: [new Product(code: 'scimitar')])
 
-        def maul = new Client(active: true, firstName: 'Darth', lastName: 'Maul', wishes: [wishes])
-        def vader = new Client(active: true, firstName: 'Darth', lastName: 'Vader', wishes: [wishes2])
+        def maul = new Client(active: true, firstName: 'Darth', lastName: 'Maul', wishes: [])
+        maul.addWishlist(wishes)
+        def vader = new Client(active: true, firstName: 'Darth', lastName: 'Vader', wishes: [])
+        vader.addWishlist(wishes2)
 
         clientRepository.saveAllAndFlush([maul, vader])
 
@@ -82,21 +83,22 @@ class ClientSearchIntegrationSpec extends Specification {
         response.andExpect(status().isNotFound())
     }
 
-    @Transactional
     def 'List of clients on given page of given size that have desired products on their wishlists is returned'() {
         given:
         def wishes = new Wishlist(products: [new Product(code: 'Father')])
         def wishes2 = new Wishlist(products: [new Product(code: 'father')])
 
-        def skywalker = new Client(active: true, firstName: 'Anakin', lastName: 'Skywalker', wishes: [wishes])
-        def windu = new Client(active: true, firstName: 'Mace', lastName: 'Windu', wishes: [wishes2])
+        def skywalker = new Client(active: true, firstName: 'Anakin', lastName: 'Skywalker', wishes: [])
+        skywalker.addWishlist(wishes)
+        def windu = new Client(active: true, firstName: 'Mace', lastName: 'Windu', wishes: [])
+        windu.addWishlist(wishes2)
 
         clientRepository.saveAllAndFlush([skywalker, windu])
 
         when:
         def response = mockMvc.perform(get(CLIENT_CONTROLLER_SEARCHBYCODE_PATH)
                 .param('code', 'fat')
-                .param('page', '2')
+                .param('page', '1')
                 .param('size', '1')
         )
 
